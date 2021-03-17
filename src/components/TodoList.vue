@@ -2,20 +2,22 @@
   <div class="todolist">
     <div
       class="input-update"
-      v-for="(item, index) in items"
+      v-for="(item,index) in items"
       v-bind:key="item.id"
     >
       <input type="item.message" v-model="item.message" />
-      <button class="edit-button" @click="$emit('edit', $event, index)">
+      <!-- 
+      $eventは子からデータを受け取った時に記述するので$emitの第二引数部分には渡したい値を記述します
+      todoのidを渡すと良いと思います！
+      -->
+      <button class="edit-button" @click="$emit('edit', id,index)"></button>
         更新
-      </button>
-      <button class="remove-button" @click="$emit('remove', $event, index)">
+      <button class="remove-button" @click="$emit('remove', id,index)">
         削除
       </button>
     </div>
   </div>
 </template>
-
 <script>
 export default {
   name: "todo-list",

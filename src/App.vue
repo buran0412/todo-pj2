@@ -1,91 +1,34 @@
 <template>
-  <div id="app">
-    <div class="container">
-      <div class="card">
-        <p>Todo List</p>
-        <span></span>
-        <input v-model="task" class="input-add" />
-        <button class="add" v-on:click="addTodo">追加</button>
-        <todo-list v-on:remove="removeTodo" v-bind:items="todos"></todo-list>
-      </div>
+  <div class="todolist">
+    <div
+      class="input-update"
+      v-for="(item,index) in items"
+      v-bind:key="item.id"
+    >
+      <input type="item.message" v-model="item.message" />
+      <!-- 
+      $eventは子からデータを受け取った時に記述するので$emitの第二引数部分には渡したい値を記述します
+      todoのidを渡すと良いと思います！
+      -->
+      <button class="edit-button" @click="$emit('edit', id,index)"></button>
+        更新
+      <button class="remove-button" @click="$emit('remove', id,index)">
+        削除
+      </button>
     </div>
   </div>
 </template>
 
 <script>
-import TodoList from "../src/components/TodoList.vue";
-import axios from "axios";
 export default {
-  name: "app",
-  components: {
-    TodoList,
-  },
-  data: function() {
-    return {
-      task: "",
-      todos: [],
-      count: 0,
-    };
-  },
-  methods: {
-    addTodo: function() {
-      if (this.task === "") {
-        alert("作業名を入力してください");
-        return;
-      }
-      this.todos.push({
-        message: this.task,
-        id: ++this.count,
-      });
-      this.task = "";
-      this.cancel();
+  name: "todo-list",
+  props: {
+    items: {
+      type: Array,
+      default: function() {
+        return [];
+      },
     },
-    cancel() {
-      this.text = "";
-      this.editIndex = -1;
-    },
-    editTodo: function(event, index) {
-      this.todos.splice(index, 1);
-    },
-    removeTodo: function(event, index) {
-      this.todos.splice(index, 1);
-    },
-    async addtodo() {
-      const resData = await axios.get(
-        "https://fierce-bayou-38843.herokuapp.com/api/todos"
-      );
-      this.todos = resData.data.data;
-    },
-    async insert() {
-      const sendData = {
-        todos: this.todos,
-        task: this.task,
-      };
-      await axios.post(
-        "https://fierce-bayou-38843.herokuapp.com/api/todos",
-        sendData
-      );
-      await this.get();
-    },
-    async update(id, task) {
-      const sendData = {
-        task: task,
-      };
-      await axios.put(
-        "https://fierce-bayou-38843.herokuapp.com/api/todos" + id,
-        sendData
-      );
-      await this.get();
-    },
-    async delete(id) {
-      await axios.delete(
-        "https://fierce-bayou-38843.herokuapp.com/api/todos" + id
-      );
-      await this.get();
-    },
-  },
-  created() {
-    this.get();
   },
 };
 </script>

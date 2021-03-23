@@ -34,6 +34,7 @@ export default {
       task: "",
       todos: [],
       count: 0,
+      id: [],
     };
   },
   methods: {
@@ -80,7 +81,7 @@ export default {
 
     removeTodo: function () {
       axios
-        .delete("http://127.0.0.1:8001/api/todos" + "id")
+        .delete("http://127.0.0.1:8001/api/todos" + id)
         .then((response) => console.log(response))
         .catch((error) => console.log(error));
       this.todos.splice(index, 1);

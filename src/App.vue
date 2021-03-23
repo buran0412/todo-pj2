@@ -6,9 +6,16 @@
         <span></span>
         <input v-model="task" class="input-add" />
         <button class="add" v-on:click="addTodo">追加</button>
-        <!-- TODO：更新時にeditのイベントも取得する必要がありそうです！ -->
-        <todo-list v-on:edit="editTodo" v-bind:items="todos"></todo-list>
-        <todo-list v-on:remove="removeTodo" v-bind:items="todos"></todo-list>
+
+        <!-- 
+          コンポーネントは複数のイベントを一つのタグから受け取ることができます
+          editイベントを受け取る際は「todo-list」コンポーネントの仕様上以下のように記述します
+        -->
+        <todo-list
+          v-on:remove="removeTodo"
+          v-on:edit="editTodo"
+          v-bind:items="todos"
+        ></todo-list>
       </div>
     </div>
   </div>
@@ -22,7 +29,7 @@ export default {
   components: {
     TodoList,
   },
-  data: function() {
+  data: function () {
     return {
       task: "",
       todos: [],
@@ -30,46 +37,60 @@ export default {
     };
   },
   methods: {
-    addTodo: function() {
+    addTodo: function () {
       if (this.task === "") {
         alert("作業名を入力してください");
         return;
       }
-      // TODO：データを追加する処理を実行
+      // TODO：データを追加する処理の記述（POSTメソッドを実行している関数の記述）
+      axios
+        .post("http://127.0.0.1:8001/api/todos", {
+          task: this.task,
+        })
+        .then((response) => this.users.unshift(response.data))
+        .catch((error) => console.log(error));
       this.todos.push({
         message: this.task,
         id: ++this.count,
       });
       this.task = "";
-      this.cancel();
-      const array =["task"]
-      console.log(array.slice)},
-      async addtodo() {
-      const resData = await axios.get(
-        "http://127.0.0.1:8001/api/todos"
-      );
+      //こちらの処理ですでに入力したテキストのリセット（何も入力していない状態）にしているのでthis.cancel()の処理は不要です
+      const array = ["task"];
+    },
+    // こちらの処理も関与している影響している部分がないので不要です
+    // こちらがデータベースからtodoを受け取るリクエスト
+    // 同名の関数があるため関数名は変更しましょう
+    async add() {
+      const resData = await axios.get("http://127.0.0.1:8001/api/todos");
       this.todos = resData.data.data;
     },
     cancel() {
       this.text = "";
       this.editIndex = -1;
     },
-    editTodo: function(event, index) {
-      // TODO：データを更新するリクエスト送信
-      this.todos.splice(index, 1);
+
+    editTodo: function (event, index) {
+      // TODO：データベースのデータを更新する処理の記述 または（PUTメソッドを実行している関数の記述）
+      // editしたtodoを画面上で削除してしまうことになるので以下の処理は不要です
+      axios
+        .patch("http://127.0.0.1:8001/api/todos/1")
+        .then((response) => this.users.unshift(response.data))
+        .catch((error) => console.log(error));
     },
-    removeTodo: function(event, index) {
-      // TODO：データを削除するリクエスト送信
+
+    removeTodo: function (event, index) {
+      axios
+        .delete("http://127.0.0.1:8001/api/todos" + id)
+        .then((response) => console.log(response))
+        .catch((error) => console.log(error));
       this.todos.splice(index, 1);
     },
     async edit(id, task) {
       const sendData = {
         task: task,
       };
-      await axios.put(
-        "http://127.0.0.1:8001/api/todos" + id,
-        sendData
-      );
+      await axios.put("http://127.0.0.1:8001/api/todos" + id, sendData);
+      // 以下の関数名が存在しないためこちらの関数の呼び出しは意味がない処理になっています
       await this.get();
     },
     async insert() {
@@ -78,31 +99,24 @@ export default {
         task: this.task,
       };
       console.log(sendData);
-      await axios.post(
-        "http://127.0.0.1:8001/api/todos",
-        sendData
-      );
+      await axios.post("http://127.0.0.1:8001/api/todos", sendData);
       await this.get();
     },
     async delete(id) {
-      await axios.delete(
-        "http://127.0.0.1:8001/api/todos" + id
-      );
-      // 削除時にTODOのデータを再取得はしなくても良いと思います！
-      // すでに削除の処理（spliceがあるため）
+      await axios.delete("http://127.0.0.1:8001/api/todos" + id);
     },
   },
   created() {
-    // getという処理はメソッド内に定義されていないので以下の記述は意味がない処理になります
-    // 画面を読み込み時に取得したいデータはtodoのデータなので
-    // 処理の内容がマッチするのはasync addtodoに当たります
-    // 同名の関数があるので名前を変更した方が良さそうです
-    this.gettodo();
-
     // TODO：todoのデータを取得する処理または関数の記述
-  },
-};
+    // 以下の関数名が存在しないためこちらの関数の呼び出しは意味がない処理になっています
+    axios.get("http://127.0.0.1:8001/api/todos")
+            .then(response => this.users = response.data)
+            .catch(error => console.log(error))
+    }
+}
 </script>
+
+
 
 <style>
 .container {

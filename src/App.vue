@@ -21,6 +21,7 @@
   </div>
 </template>
 
+
 <script>
 import TodoList from "../src/components/TodoList.vue";
 import axios from "axios";
@@ -34,7 +35,7 @@ export default {
       task: "",
       todos: [],
       count: 0,
-      id: [],
+      id: []
     };
   },
   methods: {
@@ -56,7 +57,7 @@ export default {
       });
       this.task = "";
       //こちらの処理ですでに入力したテキストのリセット（何も入力していない状態）にしているのでthis.cancel()の処理は不要です
-      const array = [task];
+      const push = task;
     },
     // こちらの処理も関与している影響している部分がないので不要です
     // こちらがデータベースからtodoを受け取るリクエスト
@@ -81,10 +82,10 @@ export default {
 
     removeTodo: function () {
       axios
-        .delete("http://127.0.0.1:8001/api/todos" + id)
+        .delete("http://127.0.0.1:8001/api/todos" + {id})
         .then((response) => console.log(response))
         .catch((error) => console.log(error));
-      this.todos.splice(index, 1);
+      this.todos.splice({index}, 1);
     },
     async edit(id, task) {
       const sendData = {

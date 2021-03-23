@@ -55,7 +55,7 @@ export default {
       });
       this.task = "";
       //こちらの処理ですでに入力したテキストのリセット（何も入力していない状態）にしているのでthis.cancel()の処理は不要です
-      const array = ["task"];
+      const array = [task];
     },
     // こちらの処理も関与している影響している部分がないので不要です
     // こちらがデータベースからtodoを受け取るリクエスト
@@ -69,7 +69,7 @@ export default {
       this.editIndex = -1;
     },
 
-    editTodo: function (event, index) {
+    editTodo: function () {
       // TODO：データベースのデータを更新する処理の記述 または（PUTメソッドを実行している関数の記述）
       // editしたtodoを画面上で削除してしまうことになるので以下の処理は不要です
       axios
@@ -78,9 +78,9 @@ export default {
         .catch((error) => console.log(error));
     },
 
-    removeTodo: function (event, index) {
+    removeTodo: function () {
       axios
-        .delete("http://127.0.0.1:8001/api/todos" + id)
+        .delete("http://127.0.0.1:8001/api/todos" + "id")
         .then((response) => console.log(response))
         .catch((error) => console.log(error));
       this.todos.splice(index, 1);

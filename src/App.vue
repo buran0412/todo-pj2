@@ -15,8 +15,7 @@
             <input type="text" v-model="item.todo" />
             <button
               class="update-button"
-              @click="updateContact(item.id, item.todo)"
-            >
+              @click="updateContact(item.id, item.todo)>
               更新
             </button>
             <button class="edit-button" @click="deleteContact(item.id)">
@@ -50,10 +49,9 @@ export default {
       await axios.post("http://127.0.0.1:8000/api/contact/", sendData);
       await this.getContact();
     },
-    async updateContact(id, name, email) {
+    async updateContact(id, name) {
       const sendData = {
         name: name,
-        email: email,
       };
       await axios.put("http://127.0.0.1:8000/api/contact/" + id, sendData);
       await this.getContact();

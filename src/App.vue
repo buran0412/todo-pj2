@@ -15,7 +15,7 @@
             <input type="text" v-model="item.todo" />
             <button
               class="update-button"
-              @click="updateContact(item.id, item.todo)>
+              @click="updateContact(item.id, item.todo)">
               更新
             </button>
             <button class="edit-button" @click="deleteContact(item.id)">

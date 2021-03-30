@@ -6,21 +6,29 @@
         <span></span>
         <input v-model="task" class="input-add" />
         <button class="add" v-on:click="addTodo">追加</button>
-
         <!-- 
-          コンポーネントは複数のイベントを一つのタグから受け取ることができます
-          editイベントを受け取る際は「todo-list」コンポーネントの仕様上以下のように記述します
+        おそらくtodoをコンポーネント化することで処理を複雑にしてしまっているので
+        todo-listコンポーネントのtamplateタグ内の記述はApp.vueに直接記述した方が良いと思います
         -->
-        <todo-list
-          v-on:remove="removeTodo"
-          v-on:edit="editTodo"
-          v-bind:items="todos"
-        ></todo-list>
+        <div class="todolist">
+          <div
+            class="input-update"
+            v-for="(item, index) in items"
+            v-bind:key="item.id"
+          >
+            <input type="item.message" v-model="item.message" />
+            <button class="edit-button" v-on:click="$emit('edit', id, index)">
+              更新
+            </button>
+            <button class="remove-button" v-on:click="$emit('remove', id, index)">
+              削除
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </template>
-
 
 <script>
 import TodoList from "../src/components/TodoList.vue";
@@ -35,7 +43,7 @@ export default {
       task: "",
       todos: [],
       count: 0,
-      id: []
+      id: [],
     };
   },
   methods: {
@@ -44,80 +52,94 @@ export default {
         alert("作業名を入力してください");
         return;
       }
-      // TODO：データを追加する処理の記述（POSTメソッドを実行している関数の記述）
       axios
-        .post("http://127.0.0.1:8001/api/todos", {
-          task: this.task,
+        .post("http://127.0.0.1:8000/api/todos", {
+          // バックエンドのlaravelのTodosControllerのstore関数で受け取るのはtextプロパティなのでtext: this.taskとなります
+          text: this.task,
         })
-        .then((response) => this.users.unshift(response.data))
+        .then((response) =>
+          this.todos.push({
+            message: this.task,
+            id: ++this.count,
+          })
+        )
         .catch((error) => console.log(error));
-      this.todos.push({
-        message: this.task,
-        id: ++this.count,
-      });
+      // コメント
+      // this.users.unshift(response.data)
+      // 上記記述は何をしている処理ですか？
+      // 不要な場合は削除しましょう！
+
+      // コメント
+      // 上記リクエストを送る処理が成功した時の処理（.thenの中）より先に下の処理が実行されてしまいます
+      // 以下の処理は.thenの中に記述すると良いと思います
       this.task = "";
-      //こちらの処理ですでに入力したテキストのリセット（何も入力していない状態）にしているのでthis.cancel()の処理は不要です
-      const push = task;
+      // const push = task;
     },
-    // こちらの処理も関与している影響している部分がないので不要です
-    // こちらがデータベースからtodoを受け取るリクエスト
-    // 同名の関数があるため関数名は変更しましょう
-    async add() {
-      const resData = await axios.get("http://127.0.0.1:8001/api/todos");
-      this.todos = resData.data.data;
-    },
-    cancel() {
-      this.text = "";
-      this.editIndex = -1;
-    },
+    // async add() {
+    //   const resData = await axios.get("http://127.0.0.1:8001/api/todos");
+    //   this.todos = resData.data.data;
+    // },
+    // cancel() {
+    //   this.text = "";
+    //   this.editIndex = -1;
+    // },
 
     editTodo: function () {
-      // TODO：データベースのデータを更新する処理の記述 または（PUTメソッドを実行している関数の記述）
-      // editしたtodoを画面上で削除してしまうことになるので以下の処理は不要です
+      // コメント
+      // patchリクエストではなくputリクエストを送信して既存のtodoの更新を行ってください
+      // また、http://127.0.0.1:8001/api/todos/1このように記述することでidが1のtodoのみ変更できるようになってしまうので
+      // 他のtodoのidがを入れて更新できるようにURLを変更していただきたいです
+
+      // コメント
+      // bodyには変更するテキストの内容を入れてください
+      // こちらもpostメソッド同様にlaravelのupdate関数が受け取るのは「text」プロパティになりますので
+      // text: todoの変更内容
       axios
-        .patch("http://127.0.0.1:8001/api/todos/1")
-        .then((response) => this.users.unshift(response.data))
+        .put("http://127.0.0.1:8000/api/todos" + id)
+        .then((response) =>this.users.unshift(response.data))
         .catch((error) => console.log(error));
     },
 
     removeTodo: function () {
       axios
-        .delete("http://127.0.0.1:8001/api/todos" + {id})
+        .post("http://127.0.0.1:8000/api/todos" + id,{todo:"edit"})
         .then((response) => console.log(response))
         .catch((error) => console.log(error));
-      this.todos.splice({index}, 1);
+
+      // コメント
+      // indexの値が取れていないので削除する対象のidをもとに配列の何番目かを特定してindexの値を入れましょう
+      // indexOfを使用すると良いと思います
+      this.todos.splice(indexof, id);
     },
-    async edit(id, task) {
-      const sendData = {
-        task: task,
-      };
-      await axios.put("http://127.0.0.1:8001/api/todos" + id, sendData);
-      // 以下の関数名が存在しないためこちらの関数の呼び出しは意味がない処理になっています
-      await this.get();
-    },
-    async insert() {
-      const sendData = {
-        todos: this.todos,
-        task: this.task,
-      };
-      console.log(sendData);
-      await axios.post("http://127.0.0.1:8001/api/todos", sendData);
-      await this.get();
-    },
-    async delete(id) {
-      await axios.delete("http://127.0.0.1:8001/api/todos" + id);
-    },
+    // async edit(id, task) {
+    //   const sendData = {
+    //     task: task,
+    //   };
+    //   await axios.put("http://127.0.0.1:8001/api/todos" + id, sendData);
+    // },
+    // async insert() {
+    //   const sendData = {
+    //     todos: this.todos,
+    //     task: this.task,
+    //   };
+    //   console.log(sendData);
+    //   await axios.post("http://127.0.0.1:8001/api/todos", sendData);
+    // },
+    // async delete(id) {
+    //   await axios.delete("http://127.0.0.1:8001/api/todos" + id);
+    // },
   },
   created() {
-    // TODO：todoのデータを取得する処理または関数の記述
-    // 以下の関数名が存在しないためこちらの関数の呼び出しは意味がない処理になっています
-    axios.get("http://127.0.0.1:8001/api/todos")
-            .then(response => this.users = response.data)
-            .catch(error => console.log(error))
-    }
-}
+    axios
+      .get("http://127.0.0.1:8000/api/todos")
+      .then((response) => (this.users = response.data))
+      .catch((error) => console.log(error));
+    // コメント
+    // todoを描画しているのはdataプロパティにあるtodoなので
+    this.todo = response.data;
+  },
+};
 </script>
-
 
 
 <style>

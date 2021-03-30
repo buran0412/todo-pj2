@@ -3,24 +3,23 @@
     <div class="container">
       <div class="card">
         <p>Todo List</p>
-        <span></span>
-        <input v-model="task" class="input-add" />
-        <button class="add" v-on:click="addTodo">追加</button>
-        <!-- 
-        おそらくtodoをコンポーネント化することで処理を複雑にしてしまっているので
-        todo-listコンポーネントのtamplateタグ内の記述はApp.vueに直接記述した方が良いと思います
-        -->
+        <div class="new">
+          <div class="name">
+            <input type="text" name="name" id="name" v-model="newTodo" />
+          </div>
+          <button class="add-button" @click="insertContact">追加</button>
+        </div>
         <div class="todolist">
-          <div
-            class="input-update"
-            v-for="(item, index) in items"
-            v-bind:key="item.id"
-          >
-            <input type="item.message" v-model="item.message" />
-            <button class="edit-button" v-on:click="$emit('edit', id, index)">
+          <div class="input-update" v-for="item in contactLists" :key="item.id">
+            <dl>{{ item.id }}</dl>
+            <input type="text" v-model="item.todo" />
+            <button
+              class="update-button"
+              @click="updateContact(item.id, item.todo)"
+            >
               更新
             </button>
-            <button class="remove-button" v-on:click="$emit('remove', id, index)">
+            <button class="edit-button" @click="deleteContact(item.id)">
               削除
             </button>
           </div>
@@ -31,116 +30,44 @@
 </template>
 
 <script>
-import TodoList from "../src/components/TodoList.vue";
 import axios from "axios";
 export default {
-  name: "app",
-  components: {
-    TodoList,
-  },
-  data: function () {
+  data() {
     return {
-      task: "",
-      todos: [],
-      count: 0,
-      id: [],
+      newTodo: "",
+      contactLists: [],
     };
   },
   methods: {
-    addTodo: function () {
-      if (this.task === "") {
-        alert("作業名を入力してください");
-        return;
-      }
-      axios
-        .post("http://127.0.0.1:8000/api/todos", {
-          // バックエンドのlaravelのTodosControllerのstore関数で受け取るのはtextプロパティなのでtext: this.taskとなります
-          text: this.task,
-        })
-        .then((response) =>
-          this.todos.push({
-            message: this.task,
-            id: ++this.count,
-          })
-        )
-        .catch((error) => console.log(error));
-      // コメント
-      // this.users.unshift(response.data)
-      // 上記記述は何をしている処理ですか？
-      // 不要な場合は削除しましょう！
-
-      // コメント
-      // 上記リクエストを送る処理が成功した時の処理（.thenの中）より先に下の処理が実行されてしまいます
-      // 以下の処理は.thenの中に記述すると良いと思います
-      this.task = "";
-      // const push = task;
+    async getContact() {
+      const resData = await axios.get("http://127.0.0.1:8000/api/contact/");
+      this.contactLists = resData.data.data;
     },
-    // async add() {
-    //   const resData = await axios.get("http://127.0.0.1:8001/api/todos");
-    //   this.todos = resData.data.data;
-    // },
-    // cancel() {
-    //   this.text = "";
-    //   this.editIndex = -1;
-    // },
-
-    editTodo: function () {
-      // コメント
-      // patchリクエストではなくputリクエストを送信して既存のtodoの更新を行ってください
-      // また、http://127.0.0.1:8001/api/todos/1このように記述することでidが1のtodoのみ変更できるようになってしまうので
-      // 他のtodoのidがを入れて更新できるようにURLを変更していただきたいです
-
-      // コメント
-      // bodyには変更するテキストの内容を入れてください
-      // こちらもpostメソッド同様にlaravelのupdate関数が受け取るのは「text」プロパティになりますので
-      // text: todoの変更内容
-      axios
-        .put("http://127.0.0.1:8000/api/todos" + id)
-        .then((response) =>this.users.unshift(response.data))
-        .catch((error) => console.log(error));
+    async insertContact() {
+      const sendData = {
+        name: this.newTodo,
+      };
+      await axios.post("http://127.0.0.1:8000/api/contact/", sendData);
+      await this.getContact();
     },
-
-    removeTodo: function () {
-      axios
-        .post("http://127.0.0.1:8000/api/todos" + id,{todo:"edit"})
-        .then((response) => console.log(response))
-        .catch((error) => console.log(error));
-
-      // コメント
-      // indexの値が取れていないので削除する対象のidをもとに配列の何番目かを特定してindexの値を入れましょう
-      // indexOfを使用すると良いと思います
-      this.todos.splice(indexof, id);
+    async updateContact(id, name, email) {
+      const sendData = {
+        name: name,
+        email: email,
+      };
+      await axios.put("http://127.0.0.1:8000/api/contact/" + id, sendData);
+      await this.getContact();
     },
-    // async edit(id, task) {
-    //   const sendData = {
-    //     task: task,
-    //   };
-    //   await axios.put("http://127.0.0.1:8001/api/todos" + id, sendData);
-    // },
-    // async insert() {
-    //   const sendData = {
-    //     todos: this.todos,
-    //     task: this.task,
-    //   };
-    //   console.log(sendData);
-    //   await axios.post("http://127.0.0.1:8001/api/todos", sendData);
-    // },
-    // async delete(id) {
-    //   await axios.delete("http://127.0.0.1:8001/api/todos" + id);
-    // },
+    async deleteContact(id) {
+      await axios.delete("http://127.0.0.1:8000/api/contact/" + id);
+      await this.getContact();
+    },
   },
   created() {
-    axios
-      .get("http://127.0.0.1:8000/api/todos")
-      .then((response) => (this.users = response.data))
-      .catch((error) => console.log(error));
-    // コメント
-    // todoを描画しているのはdataプロパティにあるtodoなので
-    this.todo = response.data;
+    this.getContact();
   },
 };
 </script>
-
 
 <style>
 .container {
@@ -173,11 +100,58 @@ export default {
   outline: none;
   vertical-align: middle;
 }
-.add {
+.add-button {
   text-align: left;
   border: 2px solid #dc70fa;
   font-size: 12px;
   color: #dc70fa;
+  background-color: #fff;
+  font-weight: bold;
+  padding: 8px 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: 0.4s;
+  outline: none;
+}
+.input {
+  width: 80%;
+  padding: 5px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  font-size: 14px;
+  outline: none;
+  vertical-align: middle;
+}
+.todolist {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  font-size: 100%;
+  vertical-align: baseline;
+  background: transparent;
+}
+.edit-button {
+  text-align: left;
+  border: 2px solid #fa9770;
+  font-size: 12px;
+  color: #fa9770;
+  background-color: #fff;
+  font-weight: bold;
+  padding: 8px 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: 0.4s;
+  outline: none;
+}
+.update-button {
+  text-align: left;
+  border: 2px solid #71fadc;
+  font-size: 12px;
+  color: #71fadc;
   background-color: #fff;
   font-weight: bold;
   padding: 8px 16px;

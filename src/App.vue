@@ -34,35 +34,61 @@ export default {
   data() {
     return {
       newTodo: "",
-      contactLists: [],
+      todoLists: [],
+      task: "",
+      todos: [],
+      count: 0,
+      id: [],
     };
   },
   methods: {
-    async getContact() {
-      const resData = await axios.get("http://127.0.0.1:8000/api/contact/");
-      this.contactLists = resData.data.data;
-    },
-    async insertContact() {
-      const sendData = {
-        name: this.newTodo,
-      };
-      await axios.post("http://127.0.0.1:8000/api/contact/", sendData);
-      await this.getContact();
-    },
-    async updateContact(id, name) {
-      const sendData = {
-        name: name,
-      };
-      await axios.put("http://127.0.0.1:8000/api/contact/" + id, sendData);
-      await this.getContact();
-    },
-    async deleteContact(id) {
-      await axios.delete("http://127.0.0.1:8000/api/contact/" + id);
-      await this.getContact();
+    async getTodo() {
+      const resData = await axios.get(
+        "https://safe-bayou-30799.herokuapp.com/api/todos/"
+      );
+      this.todoLists = resData.data.data;
+      if (this.task === "") {
+        alert("作業名を入力してください");
+        return;
+      }
+      axios.post("https://safe-bayou-30799.herokuapp.com/api/todos", {
+        text: this.task,
+      });
+      this.todos.push({
+        message: this.task,
+        id: ++this.count,
+      }),
+        (this.task = "");
     },
   },
-  created() {
+  async insertTodo() {
+    const sendData = {
+      text: this.newTodo,
+    };
+    await axios.post(
+      "https://safe-bayou-30799.herokuapp.com/api/todos/",
+      sendData
+    );
+    this.getTodo();
+  },
+  async updateTodo(id, text) {
+    const sendData = {
+      text: todo,
+    };
+    await axios.put(
+      "https://safe-bayou-30799.herokuapp.com/api/todos/" + id,
+      sendData
+    );
+    this.getTodo();
+  },
+  async deleteTodo(id) {
+    await axios.delete(
+      "https://safe-bayou-30799.herokuapp.com/api/todos/" + id
+    );
     this.getContact();
+  },
+  created() {
+    axios.get("https://safe-bayou-30799.herokuapp.com//api/todos");
   },
 };
 </script>
